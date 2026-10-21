@@ -51,10 +51,10 @@ configuration:
       model on the Anthropic API (some other providers pick an earlier one). Or pin a
       release: "claude-fable-5-1" is the most capable (top tier above Opus),
       "claude-opus-5-5" is the current Opus, "claude-sonnet-5-5" balances speed and
-      capability, and "claude-haiku-5-5" is the fastest. All except Sonnet 4.6 and Haiku 4.5
-      have a 1M-token context window (availability and pricing depend on your plan). Choose
-      "custom" to use any model id entered in Model (custom) below — handy for newer models
-      not in this list, with no add-on update needed.
+      capability, and "claude-haiku-5-5" is the fastest. Every pinned id except Sonnet 4.6
+      and Haiku 4.5 has a 1M-token context window (availability and pricing depend on your
+      plan). Choose "custom" to use any model id entered in Model (custom) below — handy for
+      newer models not in this list, with no add-on update needed.
   model_custom:
     name: Model (custom)
     description: >-

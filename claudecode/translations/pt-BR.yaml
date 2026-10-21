@@ -52,8 +52,9 @@ configuration:
       da família na API da Anthropic (outros provedores podem escolher um anterior). Ou fixe uma
       versão: "claude-fable-5-1" é o mais capaz (nível acima
       do Opus), "claude-opus-5-5" é o Opus atual, "claude-sonnet-5-5" equilibra velocidade e
-      capacidade, e "claude-haiku-5-5" é o mais rápido. Todos exceto Sonnet 4.6 e Haiku 4.5
-      têm janela de contexto de 1M tokens (disponibilidade e preço dependem do seu plano).
+      capacidade, e "claude-haiku-5-5" é o mais rápido. Todos os ids fixos exceto Sonnet 4.6
+      e Haiku 4.5 têm janela de contexto de 1M tokens (disponibilidade e preço dependem do
+      seu plano).
       Escolha "custom" para usar qualquer id informado em Modelo (personalizado) abaixo —
       útil para modelos novos fora desta lista, sem atualizar o add-on.
   model_custom:

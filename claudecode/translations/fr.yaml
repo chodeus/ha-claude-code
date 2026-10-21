@@ -53,9 +53,9 @@ configuration:
       (d'autres fournisseurs peuvent en choisir un plus ancien). Ou fixez une version :
       « claude-fable-5-1 » est le plus performant (niveau au-dessus d'Opus),
       « claude-opus-5-5 » est l'Opus actuel, « claude-sonnet-5-5 » équilibre vitesse et
-      capacité, et « claude-haiku-5-5 » est le plus rapide. Tous sauf Sonnet 4.6 et Haiku 4.5
-      disposent d'une fenêtre de contexte de 1M de tokens (disponibilité et tarif selon votre
-      offre). Choisissez « custom » pour utiliser tout identifiant saisi dans Modèle
+      capacité, et « claude-haiku-5-5 » est le plus rapide. Tous les identifiants fixes sauf
+      Sonnet 4.6 et Haiku 4.5 disposent d'une fenêtre de contexte de 1M de tokens
+      (disponibilité et tarif selon votre offre). Choisissez « custom » pour utiliser tout identifiant saisi dans Modèle
       (personnalisé) ci-dessous — pratique pour les nouveaux modèles absents de cette liste,
       sans mise à jour de l'add-on.
   model_custom:

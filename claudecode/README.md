@@ -196,18 +196,21 @@ working.
 | `claude-haiku-4-5` | Previous Haiku. 200K context |
 | `custom` | Use whatever id you put in `model_custom` |
 
-> **About the 1M context window:** every model in the list except Sonnet 4.6 and Haiku 4.5 is
-> **natively 1M-context** — there is nothing to opt into. The `[1m]`-suffixed entries this dropdown used to
+> **About the 1M context window:** every pinned id in the list except `claude-sonnet-4-6` and
+> `claude-haiku-4-5` is **natively 1M-context** — there is nothing to opt into. An alias gets the
+> window of whichever model your provider maps it to. The `[1m]`-suffixed entries this dropdown used to
 > carry were removed in 2.9.0: on those models the suffix is a no-op, and Fable 5 never offered a
 > `[1m]` variant at all. Sonnet 4.6 still defaults to 200K and can be pushed to 1M with the suffix
 > — put `claude-sonnet-4-6[1m]` in `model_custom` if you want that, or switch in-session with
 > `/model`.
 >
-> **⚠️ Cost:** the natively-1M models need no opt-in and no usage credits, but a long conversation
-> still costs more tokens, and on the Anthropic API Haiku 5.5 charges more per token once a prompt
-> passes 100K. Usage credits only apply to Sonnet 4.6's `[1m]` variant, which needs them on every
-> subscription plan (on the API it bills at standard rates). Fable is priced above the Opus tier at
-> any context size — prefer a Sonnet/Haiku tier for routine work.
+> **⚠️ Cost:** a natively-1M model needs no opt-in, but a long conversation still costs more
+> tokens, and on the Anthropic API Haiku 5.5 charges more per token once a prompt passes 100K.
+> Depending on your plan and seat tier, Fable can bill to usage credits instead of your plan's
+> limits: the `/model` picker then marks it "Requires usage credits", and an interactive session
+> asks before billing (a `claude -p` run doesn't ask). Sonnet 4.6's `[1m]` variant needs usage
+> credits on every subscription plan (on the API it bills at standard rates). Fable is priced above
+> the Opus tier at any context size — prefer a Sonnet/Haiku tier for routine work.
 
 > **How `default` resolves:** `default` simply leaves the model unpinned (the add-on doesn't set
 > `ANTHROPIC_MODEL`). Claude Code then picks the model by its own precedence: a model in
