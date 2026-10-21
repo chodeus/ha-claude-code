@@ -55,8 +55,8 @@ schema:
   working_directory: str
   session_persistence: bool
   auto_update_claude: bool
-  # fable/opus/sonnet/haiku are Claude Code aliases for each family's newest model. Keep old ids
-  # listed: the Supervisor won't start a saved config whose value has left the list.
+  # fable/opus/sonnet/haiku are Claude Code family aliases (newest model on the Anthropic API). Keep
+  # old ids listed: the Supervisor won't start a saved config whose value has left the list.
   model: list(default|fable|opus|sonnet|haiku|claude-fable-5-1|claude-opus-5-5|claude-sonnet-5-5|claude-haiku-5-5|claude-fable-5|claude-opus-5|claude-opus-4-8|claude-opus-4-7|claude-sonnet-5|claude-sonnet-4-6|claude-haiku-4-5|custom)
   model_custom: str?
   enable_remote_control: bool

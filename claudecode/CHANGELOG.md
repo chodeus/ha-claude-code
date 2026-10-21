@@ -5,11 +5,12 @@ All notable changes to this project will be documented in this file.
 ## [2.10.0] - 2026-10-21
 
 ### Added
-- **Current models and family aliases in the model dropdown.** `claude-fable-5-1`, `claude-opus-5-5`, `claude-sonnet-5-5` and `claude-haiku-5-5` are the newest of each family. The new `fable`, `opus`, `sonnet` and `haiku` entries are Claude Code aliases that always resolve to that family's newest model, so picking one keeps you current without editing the config again. Every existing id stays in the list (all are still served), so a saved choice keeps working — no re-pick needed this time
+- **Current models and family aliases in the model dropdown.** `claude-fable-5-1`, `claude-opus-5-5`, `claude-sonnet-5-5` and `claude-haiku-5-5` are the newest of each family. The new `fable`, `opus`, `sonnet` and `haiku` entries are Claude Code's family aliases. On a claude.ai plan or the Anthropic API they resolve to that family's newest model, so picking one keeps you current without editing the config again; some other providers map them to an earlier version, so choose a full id when you need one exact model. Every existing id stays in the list (all are still served), so a saved choice keeps working — no re-pick needed this time
 
 ### Changed
 - **`addon_config` is now `app_config` in the add-on's `map`.** Supervisor 2026.07 renamed the map type and logs "uses legacy map type 'addon_config'" on every store reload. The mapping itself (`/config` inside the container) is unchanged. Needs Supervisor 2026.07 or newer
 - **CI builds with `home-assistant/builder` 2026.02.1 instead of 2025.03.0.** The action is deprecated upstream and 2026.02.1 is the last tag with a published builder image. It is now SHA-pinned like every other action (the builder image is published under the commit SHA too), and `renovate.json` holds it there because a bump past 2026.02.1 would fail on `manifest unknown`
+- **CI's add-on linter moves to v2.21.1**, the first release whose schema accepts `app_config`
 - **`USE_BUILTIN_RIPGREP=0` is set in the image**, as Claude Code's setup docs require on Alpine, so search uses the image's own `ripgrep`
 
 ### Fixed

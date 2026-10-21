@@ -48,8 +48,9 @@ configuration:
     name: Modelo Claude
     description: >-
       Elige un modelo. "default" usa el predeterminado de tu cuenta Claude (cambia con /model
-      en la sesión). Los alias "fable", "opus", "sonnet" y "haiku" usan siempre el modelo más
-      reciente de esa familia. O fija una versión: "claude-fable-5-1" es el más capaz (nivel
+      en la sesión). Los alias "fable", "opus", "sonnet" y "haiku" usan el modelo más reciente
+      de esa familia en la API de Anthropic (otros proveedores pueden elegir uno anterior). O fija
+      una versión: "claude-fable-5-1" es el más capaz (nivel
       superior a Opus), "claude-opus-5-5" es el Opus actual, "claude-sonnet-5-5" equilibra
       velocidad y capacidad, y "claude-haiku-5-5" es el más rápido. Todos salvo Sonnet 4.6 y
       Haiku 4.5 tienen ventana de contexto de 1M tokens (disponibilidad y precio dependen de tu
