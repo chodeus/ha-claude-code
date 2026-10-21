@@ -55,13 +55,15 @@ RUN echo "Packages for ${BUILD_VERSION}" && apk upgrade --no-cache && apk add --
 
 # Install ttyd static binary (avoids libwebsockets issues)
 ARG BUILD_ARCH
+# renovate: datasource=github-releases depName=tsl0922/ttyd
+ARG TTYD_VERSION=1.7.7
 RUN case "${BUILD_ARCH}" in \
         amd64) TTYD_ARCH="x86_64" ;; \
         aarch64) TTYD_ARCH="aarch64" ;; \
         *) TTYD_ARCH="x86_64" ;; \
     esac && \
     curl -fsSL --retry 5 --retry-delay 2 --retry-all-errors \
-        "https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.${TTYD_ARCH}" -o /usr/bin/ttyd && \
+        "https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}/ttyd.${TTYD_ARCH}" -o /usr/bin/ttyd && \
     chmod +x /usr/bin/ttyd
 
 # Provide a passthrough sudo so Claude Code's postinstall script doesn't fail

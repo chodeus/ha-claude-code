@@ -1,0 +1,62 @@
+# Dispatched by image-refresh.yml when the published image's Alpine packages fall behind.
+# Pushes with RELEASE_TOKEN because a GITHUB_TOKEN push would not start the Builder workflow.
+
+name: Refresh release
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: refresh-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Bump the patch version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: main
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - name: Bump, commit and push
+        run: |
+          set -euo pipefail
+          cur=$(yq -r '.version' claudecode/config.yaml)
+          [[ $cur =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] || { echo "::error::unexpected version '$cur'"; exit 1; }
+          for arch in $(yq -e -r '.arch[]' claudecode/config.yaml); do
+            if ! docker manifest inspect "ghcr.io/${GITHUB_REPOSITORY_OWNER}/claudecode-$arch:$cur" >/dev/null 2>&1; then
+              echo "::notice::$cur is not published for $arch yet (a release is in flight or its build failed), so this run does not bump."
+              exit 0
+            fi
+          done
+          next="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3] + 1))"
+          sed -i "s/^version: \"$cur\"$/version: \"$next\"/" claudecode/config.yaml
+          grep -qx "version: \"$next\"" claudecode/config.yaml || { echo "::error::config.yaml version line not updated"; exit 1; }
+          ENTRY=$(printf '## [%s] - %s\n\n### Changed\n- Rebuilt with the latest Alpine packages (weekly refresh)\n' "$next" "$(date -u +%F)") \
+            awk '!done && /^## \[/ { print ENVIRON["ENTRY"]; print ""; done = 1 } { print }' \
+            claudecode/CHANGELOG.md > CHANGELOG.tmp
+          mv CHANGELOG.tmp claudecode/CHANGELOG.md
+          grep -q "^## \[$next\]" claudecode/CHANGELOG.md || { echo "::error::CHANGELOG entry not added"; exit 1; }
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "claudecode: release $next (weekly package refresh)"
+          git push origin HEAD:main
+
+  notify:
+    needs: release
+    if: failure()
+    permissions: {}
+    uses: chodeus/chodeus-ops/.github/workflows/notify-discord.yml@c36f1a3c7e8108f86b3be0e19c5e0d08502f681f # main
+    with:
+      event_type: workflow
+      status: failure
+      title: '❌ Claude Code add-on refresh release failed'
+      description: 'The version bump or its push failed; see the run. A missing RELEASE_TOKEN secret fails at checkout.'
+    secrets:
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
