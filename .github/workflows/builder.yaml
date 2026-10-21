@@ -54,17 +54,11 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Publishes ghcr.io/chodeus/claudecode-{arch}:<version from config.yaml>.
-      # PRs run with --test (build only, no push). The add-on keeps building locally on
-      # users' machines until config.yaml's `image:` key is uncommented — only do that
-      # after this workflow has published PUBLIC images for the release version.
-      # DO NOT pin this action to a SHA. It derives the builder image tag from its own ref:
-      #   input=$(echo "${{ github.action_path }}" | rev | cut -d"/" -f1 | rev)
-      #   docker pull ghcr.io/home-assistant/<arch>-builder:${input}
-      # A digest pin makes that `docker pull ...-builder:<sha>` -> "manifest unknown".
-      # renovate.json carries a matching pinDigests:false rule so Renovate stops proposing it.
+      # Publishes ghcr.io/chodeus/claudecode-{arch}:<version from config.yaml>; PRs run with --test (no push).
+      # Deprecated upstream: 2026.02.1 is the last tag with a builder image (also tagged by commit SHA,
+      # so this pin resolves). renovate.json holds it here — see CLAUDE.md.
       - name: Build ${{ matrix.arch }} add-on
-        uses: home-assistant/builder@2025.03.0
+        uses: home-assistant/builder@6cb4fd3d1338b6e22d0958a4bcb53e0965ea63b4 # 2026.02.1
         with:
           args: |
             --${{ matrix.arch }} \

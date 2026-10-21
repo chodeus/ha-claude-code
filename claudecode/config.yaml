@@ -1,6 +1,6 @@
 name: Claude Code
 description: Run Claude Code AI assistant inside Home Assistant to create automations, debug issues, and manage your smart home configuration
-version: "2.9.0"
+version: "2.10.0"
 slug: claudecode
 url: https://github.com/chodeus/robsonfelix-hass-addons
 # Claude Code ships platform binaries for x64/arm64 only (incl. musl) — 32-bit arches
@@ -30,7 +30,7 @@ map:
   - ssl:ro
   - share:rw
   - media:rw
-  - addon_config:rw
+  - app_config:rw
   - backup:ro
 options:
   enable_mcp: true
@@ -55,9 +55,9 @@ schema:
   working_directory: str
   session_persistence: bool
   auto_update_claude: bool
-  # Every model here is natively 1M-context except sonnet-4-6/haiku-4-5 (200K), so the old
-  # `[1m]` suffix entries were dropped in 2.9.0 — use model_custom for a suffixed id.
-  model: list(default|claude-fable-5|claude-opus-5|claude-opus-4-8|claude-opus-4-7|claude-sonnet-5|claude-sonnet-4-6|claude-haiku-4-5|custom)
+  # fable/opus/sonnet/haiku are Claude Code aliases for each family's newest model. Keep old ids
+  # listed: the Supervisor won't start a saved config whose value has left the list.
+  model: list(default|fable|opus|sonnet|haiku|claude-fable-5-1|claude-opus-5-5|claude-sonnet-5-5|claude-haiku-5-5|claude-fable-5|claude-opus-5|claude-opus-4-8|claude-opus-4-7|claude-sonnet-5|claude-sonnet-4-6|claude-haiku-4-5|custom)
   model_custom: str?
   enable_remote_control: bool
   remote_control_session_prefix: str

@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.10.0] - 2026-10-21
+
+### Added
+- **Current models and family aliases in the model dropdown.** `claude-fable-5-1`, `claude-opus-5-5`, `claude-sonnet-5-5` and `claude-haiku-5-5` are the newest of each family. The new `fable`, `opus`, `sonnet` and `haiku` entries are Claude Code aliases that always resolve to that family's newest model, so picking one keeps you current without editing the config again. Every existing id stays in the list (all are still served), so a saved choice keeps working — no re-pick needed this time
+
+### Changed
+- **`addon_config` is now `app_config` in the add-on's `map`.** Supervisor 2026.07 renamed the map type and logs "uses legacy map type 'addon_config'" on every store reload. The mapping itself (`/config` inside the container) is unchanged. Needs Supervisor 2026.07 or newer
+- **CI builds with `home-assistant/builder` 2026.02.1 instead of 2025.03.0.** The action is deprecated upstream and 2026.02.1 is the last tag with a published builder image. It is now SHA-pinned like every other action (the builder image is published under the commit SHA too), and `renovate.json` holds it there because a bump past 2026.02.1 would fail on `manifest unknown`
+- **`USE_BUILTIN_RIPGREP=0` is set in the image**, as Claude Code's setup docs require on Alpine, so search uses the image's own `ripgrep`
+
+### Fixed
+- **The pre-approved read rules never matched.** `Read(/homeassistant/**)`, `Read(/config/**)`, `Read(/share/**)` and `Read(/media/**)` had a single leading slash, which Claude Code anchors at `~/.claude` in user settings — so reads under `/share`, `/media` and `/config` still asked for approval (`/homeassistant` only looked fine because it is the working directory). They are now absolute `//` paths, so reads in those four folders no longer prompt, whatever `working_directory` is set to. Like the MCP tool rules beside them, they are written — and the old ones removed from an existing `settings.json` — on start when `enable_mcp` is on (the default)
+
 ## [2.9.0] - 2026-08-08
 
 ### Added

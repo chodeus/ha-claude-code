@@ -169,29 +169,39 @@ the tmux session keeps everything intact meanwhile.
 
 ### Model Selection
 
-Pick a model from the `model` dropdown:
+Pick a model from the `model` dropdown. The family aliases (`fable`, `opus`, `sonnet`, `haiku`)
+always run that family's newest model, so they keep up with new releases without a config change;
+a full id pins one release. Older ids stay in the list so a saved choice keeps working.
 
 | Option | Meaning |
 |--------|---------|
 | `default` | Don't pin a model — let Claude Code decide (see the precedence note below); switch any time with `/model` in a session |
-| `claude-fable-5` | Most capable — the top tier above Opus. 1M context, priced above Opus |
-| `claude-opus-5` | Current Opus. 1M context |
-| `claude-opus-4-8` | Previous Opus. 1M context |
+| `fable` | Newest Fable — the top tier above Opus, priced above Opus |
+| `opus` | Newest Opus |
+| `sonnet` | Newest Sonnet — balanced speed and capability |
+| `haiku` | Newest Haiku — fastest, for simple queries |
+| `claude-fable-5-1` | Fable 5.1 — the most capable model. 1M context, priced above Opus |
+| `claude-opus-5-5` | Opus 5.5 — current Opus. 1M context |
+| `claude-sonnet-5-5` | Sonnet 5.5 — current Sonnet. 1M context |
+| `claude-haiku-5-5` | Haiku 5.5 — current Haiku. 1M context |
+| `claude-fable-5` | Previous Fable. 1M context |
+| `claude-opus-5` | Previous Opus. 1M context |
+| `claude-opus-4-8` | Older Opus. 1M context |
 | `claude-opus-4-7` | Older Opus. 1M context |
-| `claude-sonnet-5` | Balanced speed/capability, near-Opus on coding. 1M context |
-| `claude-sonnet-4-6` | Previous Sonnet. 200K context |
-| `claude-haiku-4-5` | Fastest, for simple queries. 200K context |
+| `claude-sonnet-5` | Previous Sonnet. 1M context |
+| `claude-sonnet-4-6` | Older Sonnet. 200K context |
+| `claude-haiku-4-5` | Previous Haiku. 200K context |
 | `custom` | Use whatever id you put in `model_custom` |
 
-> **About the 1M context window:** Fable 5, Opus 5, Opus 4.8, Opus 4.7 and Sonnet 5 are **natively
-> 1M-context** — there is nothing to opt into. The `[1m]`-suffixed entries this dropdown used to
+> **About the 1M context window:** every model in the list except Sonnet 4.6 and Haiku 4.5 is
+> **natively 1M-context** — there is nothing to opt into. The `[1m]`-suffixed entries this dropdown used to
 > carry were removed in 2.9.0: on those models the suffix is a no-op, and Fable 5 never offered a
 > `[1m]` variant at all. Sonnet 4.6 still defaults to 200K and can be pushed to 1M with the suffix
 > — put `claude-sonnet-4-6[1m]` in `model_custom` if you want that, or switch in-session with
 > `/model`.
 >
 > **⚠️ Cost / availability:** a large context is plan-gated and **more expensive** — Claude Code's
-> model picker flags 1M usage as drawing from your usage credits, and Fable 5 is priced above the
+> model picker flags 1M usage as drawing from your usage credits, and Fable is priced above the
 > Opus tier at any context size. 1M is included on Max/Team/Enterprise (subject to that usage) and
 > billed at standard pay-as-you-go rates on Pro/API. If your plan isn't entitled, a request may
 > return a 4xx error or silently fall back to a smaller window. Long contexts cost real money

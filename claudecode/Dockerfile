@@ -8,12 +8,14 @@ LABEL org.opencontainers.image.description="Claude Code CLI with web terminal an
 LABEL org.opencontainers.image.source="https://github.com/chodeus/robsonfelix-hass-addons"
 LABEL org.opencontainers.image.licenses="MIT"
 
-# Environment setup
+# Environment setup. USE_BUILTIN_RIPGREP=0: Claude Code's setup docs require the system
+# ripgrep (installed below) on Alpine.
 ENV \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     TERM=xterm-256color \
-    DISABLE_AUTOUPDATER=1
+    DISABLE_AUTOUPDATER=1 \
+    USE_BUILTIN_RIPGREP=0
 
 # Install system dependencies (ttyd installed separately as static binary)
 RUN apk add --no-cache \

@@ -36,7 +36,7 @@ cat > "$PERSIST_DIR/CLAUDE.addon.md" << 'CLAUDEMD'
 
 In this add-on container, paths are mapped differently than HA Core:
 - `/homeassistant` = HA config directory (equivalent to `/config` in HA Core)
-- `/config` here is the ADD-ON's private config folder (addon_configs), NOT the HA config
+- `/config` here is the ADD-ON's private config folder (app_configs, formerly addon_configs), NOT the HA config
 
 When users mention `/config/...`, they almost always mean HA's config - translate to `/homeassistant/...`
 
@@ -320,11 +320,13 @@ if [ "$CLAUDE_OK" = "true" ] && [ "$ENABLE_MCP" = "true" ]; then
       "mcp__homeassistant__ha_get_logs",
       "mcp__homeassistant__ha_get_automation_traces",
       "mcp__homeassistant__ha_eval_template",
-      "Read(/homeassistant/**)",
-      "Read(/config/**)",
-      "Read(/share/**)",
-      "Read(/media/**)"
+      "Read(//homeassistant/**)",
+      "Read(//config/**)",
+      "Read(//share/**)",
+      "Read(//media/**)"
     ]'
+    # `//` is absolute: a single `/` anchors at ~/.claude in user settings, so the pre-2.10
+    # `Read(/share/**)`-style rules never matched. The strip filter below removes them.
     # NOTE: a Read(path) rule covers ALL file-reading tools (Read, Glob, Grep) — separate
     # Glob(path)/Grep(path) rules are not a valid permission form and current Claude Code
     # warns about them. The strip filter below also removes any left over from older versions.
@@ -332,7 +334,7 @@ if [ "$CLAUDE_OK" = "true" ] && [ "$ENABLE_MCP" = "true" ]; then
     # or unparseable settings.json degrades to "tools still prompt" instead of aborting startup
     # under set -e (which would crash-loop the add-on — and this terminal is the recovery tool).
     if jq --argjson tools "$ALLOWED_TOOLS" \
-        '.permissions.allow = ($tools + ((.permissions.allow // []) | map(select(test("^(Glob|Grep)\\(") | not))) | unique)' \
+        '.permissions.allow = ($tools + ((.permissions.allow // []) | map(select(test("^(Glob|Grep)\\(|^Read\\(/(homeassistant|config|share|media)/\\*\\*\\)$") | not))) | unique)' \
         "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"; then
         # The ha-mcp subprocess gets the HA connection from the exported HOMEASSISTANT_* env
         # vars, which it inherits. We deliberately do NOT persist the Supervisor token into
