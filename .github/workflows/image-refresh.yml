@@ -1,0 +1,41 @@
+# From chodeus-ops templates/caller-image-refresh.yml. Weekly rather than daily: every release
+# restarts the add-on, and the dispatched workflow cuts a new version because HA only updates on one.
+
+name: Image refresh
+
+on:
+  schedule:
+    - cron: '23 18 * * 0'   # Sunday 18:23 UTC (Monday 02:23 Perth), off the hour
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    # The called workflow can only reduce what this job grants: the pull needs
+    # packages: read and the dispatch needs actions: write.
+    permissions:
+      packages: read
+      actions: write
+    # Pin to an immutable SHA, not @main: a commit to chodeus-ops main would
+    # otherwise run in every consumer repo with its GITHUB_TOKEN (actions: write).
+    uses: chodeus/chodeus-ops/.github/workflows/image-refresh.yml@c36f1a3c7e8108f86b3be0e19c5e0d08502f681f # main
+    with:
+      image: ghcr.io/chodeus/claudecode-amd64:latest
+      workflow: refresh-release.yml
+      ref: ${{ github.event.repository.default_branch }}
+
+  notify:
+    # Only a dispatch or a failure is worth a message; a clean weekly check is not.
+    if: always() && (failure() || needs.refresh.outputs.stale == 'true')
+    needs: refresh
+    permissions: {}
+    uses: chodeus/chodeus-ops/.github/workflows/notify-discord.yml@c36f1a3c7e8108f86b3be0e19c5e0d08502f681f # main
+    with:
+      event_type: workflow
+      status: ${{ needs.refresh.result == 'success' && 'info' || 'failure' }}
+      title: ${{ needs.refresh.result == 'success' && '♻️ Claude Code add-on refresh dispatched' || '❌ Claude Code add-on refresh failed' }}
+      description: ${{ needs.refresh.result == 'success' && format('{0} pending package upgrade(s); a refresh release was dispatched.', needs.refresh.outputs.pending) || 'The package check or the dispatch failed; see the run.' }}
+    secrets:
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}

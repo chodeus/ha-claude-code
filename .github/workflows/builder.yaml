@@ -1,9 +1,8 @@
 name: Builder
 
 on:
-  # `push` stays path-filtered: this trigger PUBLISHES to GHCR, and a docs- or
-  # playwright-only commit must not re-push an already-released claudecode tag
-  # under a new digest.
+  # `push` stays path-filtered to save CI minutes; build-image's skip-existing is
+  # what stops a docs-only commit re-pushing an already-released version.
   push:
     branches: [main]
     paths:
@@ -14,55 +13,130 @@ on:
   # them — so any PR touching no claudecode/ file (another add-on, renovate.json,
   # a root doc, this workflow) sat permanently BLOCKED with 0 checks and could
   # only land via `gh pr merge --admin`. Required checks and path filters cannot
-  # coexist. PR builds pass --test, so this only costs CI minutes, never a push.
+  # coexist. PR builds don't push, so this only costs CI minutes.
   pull_request:
     branches: [main]
   workflow_dispatch:
 
+# queue: max keeps every pending run in order; the default keeps one and drops the rest.
+concurrency:
+  group: builder-${{ github.ref }}
+  queue: max
+
 jobs:
+  # Also hands build-image the version, labels and build_from it can't read itself. That lives in
+  # this required job so a failure fails a required check instead of skipping the builds.
   lint:
     name: Lint add-on
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.info.outputs.version }}
+      name: ${{ steps.info.outputs.name }}
+      description: ${{ steps.info.outputs.description }}
+      url: ${{ steps.info.outputs.url }}
+      build_from: ${{ steps.info.outputs.build_from }}
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Run Home Assistant add-on linter
         uses: frenck/action-addon-linter@b9cfd1bc62ba60d2c4fc96317b5f7ada5923f4a7 # v2
         with:
           path: ./claudecode
 
+      - name: Read add-on metadata
+        id: info
+        run: |
+          version=$(yq -e -r '.version' claudecode/config.yaml)
+          name=$(yq -e -r '.name' claudecode/config.yaml)
+          description=$(yq -e -r '.description' claudecode/config.yaml)
+          url=$(yq -e -r '.url' claudecode/config.yaml)
+          build_from=$(yq -e -o=json -I=0 '.build_from' claudecode/build.yaml)
+          {
+            echo "version=$version"
+            echo "name=$name"
+            echo "description=$description"
+            echo "url=$url"
+            echo "build_from=$build_from"
+          } >> "$GITHUB_OUTPUT"
+
+      # skip-existing would build an already-published version and quietly not push it. Renovate
+      # PRs can't bump the version; their changes ship with the next refresh release.
+      - name: Require a new version when the image changes
+        if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'renovate[bot]'
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          VERSION: ${{ steps.info.outputs.version }}
+          IMAGE: ghcr.io/${{ github.repository_owner }}/claudecode-amd64
+        run: |
+          changed=$(git diff --name-only "$BASE" HEAD -- claudecode \
+            ':!claudecode/README.md' ':!claudecode/CHANGELOG.md' ':!claudecode/translations')
+          [ -z "$changed" ] && exit 0
+          if out=$(docker manifest inspect "$IMAGE:$VERSION" 2>&1); then
+            echo "::error::$VERSION is already published and this PR changes ${changed//$'\n'/ }. Bump the version in claudecode/config.yaml."
+            exit 1
+          elif ! grep -qi -E 'manifest unknown|not found' <<<"$out"; then
+            echo "::error::Could not check whether $IMAGE:$VERSION exists: $out"
+            exit 1
+          fi
+
   build:
     name: Build ${{ matrix.arch }}
     needs: lint
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     permissions:
       contents: read
       packages: write
     strategy:
       matrix:
-        arch: [amd64, aarch64]
+        # build-image builds natively (no QEMU), so aarch64 needs an ARM runner.
+        include:
+          - arch: amd64
+            os: ubuntu-latest
+          - arch: aarch64
+            os: ubuntu-24.04-arm
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-
-      - name: Log in to GitHub Container Registry
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
         with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
 
-      # Publishes ghcr.io/chodeus/claudecode-{arch}:<version from config.yaml>; PRs run with --test (no push).
-      # Deprecated upstream: 2026.02.1 is the last tag with a builder image (also tagged by commit SHA,
-      # so this pin resolves). renovate.json holds it here — see CLAUDE.md.
+      # Publishes ghcr.io/chodeus/claudecode-{arch}:<version> and :latest on push; PRs build only.
+      # skip-existing builds an already-published version but never re-pushes it under a new digest.
       - name: Build ${{ matrix.arch }} add-on
-        uses: home-assistant/builder@6cb4fd3d1338b6e22d0958a4bcb53e0965ea63b4 # 2026.02.1
+        uses: home-assistant/builder/actions/build-image@7412f0023ea9b6e58e8bb5059f1660f51376f49a # 2026.09.0
         with:
-          args: |
-            --${{ matrix.arch }} \
-            --target /data/claudecode \
-            --image claudecode-{arch} \
-            --docker-hub ghcr.io/${{ github.repository_owner }} \
-            --addon ${{ github.event_name == 'pull_request' && '--test' || '' }}
+          arch: ${{ matrix.arch }}
+          context: ./claudecode
+          image: ghcr.io/${{ github.repository_owner }}/claudecode-${{ matrix.arch }}
+          image-tags: |
+            ${{ needs.lint.outputs.version }}
+            latest
+          version: ${{ needs.lint.outputs.version }}
+          build-args: |
+            BUILD_FROM=${{ fromJSON(needs.lint.outputs.build_from)[matrix.arch] }}
+          labels: |
+            io.hass.type=addon
+            io.hass.name=${{ needs.lint.outputs.name }}
+            io.hass.description=${{ needs.lint.outputs.description }}
+            io.hass.url=${{ needs.lint.outputs.url }}
+          push: ${{ github.event_name != 'pull_request' }}
+          skip-existing: ${{ needs.lint.outputs.version }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          cosign: false
+
+  notify:
+    needs: [lint, build]
+    if: failure() && github.event_name != 'pull_request'
+    permissions: {}
+    uses: chodeus/chodeus-ops/.github/workflows/notify-discord.yml@c36f1a3c7e8108f86b3be0e19c5e0d08502f681f # main
+    with:
+      event_type: build
+      status: failure
+      title: "❌ Claude Code add-on build failed: ${{ github.ref_name }}"
+      commit_sha: ${{ github.sha }}
+    secrets:
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}

@@ -245,6 +245,11 @@ The add-on checks for newer versions of Claude Code in the background every hour
 
 The default is off so that you decide when new code runs on your Home Assistant box.
 
+**The add-on image itself** (Alpine packages, ha-mcp, the `ha` CLI and the other bundled tools) is
+rebuilt as a new patch release whenever a weekly check finds pending Alpine package updates. If you
+turn on auto-update for the add-on in Home Assistant, those install by themselves. An add-on update
+restarts the add-on, which ends any running session; `cc` picks the conversation back up.
+
 ## File Locations
 
 | Path | Description | Access |

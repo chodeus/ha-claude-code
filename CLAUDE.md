@@ -21,8 +21,12 @@ This file contains instructions for Claude Code when working on this repository.
   (`Lint add-on`, `Build amd64`, `Build aarch64`) are the required status checks on `main`,
   so the `pull_request` trigger must stay **unfiltered** — a path-filtered workflow never
   reports a required context and leaves such PRs blocked forever. The `push` trigger keeps
-  its path filter, because that one publishes to GHCR. Don't rename these jobs without
-  re-registering the branch-protection contexts.
+  its path filter to save CI minutes; `skip-existing` is what stops a re-push. Don't rename
+  these jobs without re-registering the branch-protection contexts.
+- `.github/workflows/image-refresh.yml` - Weekly: chodeus-ops' image-refresh check on
+  `claudecode-amd64:latest`; dispatches `refresh-release.yml` when Alpine packages are pending
+- `.github/workflows/refresh-release.yml` - Bumps the patch version + CHANGELOG and pushes to `main`
+  with the `RELEASE_TOKEN` secret, which starts the Builder workflow
 - `claudecode/` - Claude Code add-on
   - `config.yaml` - Add-on configuration (bump version here)
   - `Dockerfile` - Container build instructions
@@ -55,10 +59,15 @@ When making changes that require a new release:
   value the Supervisor logs one warning and silently substitutes `ghcr.io/home-assistant/base:latest`
   — the build then fails much later on a distro mismatch (e.g. `apt-get: not found` on Alpine).
   Hardcode `FROM` in the Dockerfile for such images instead of using `build.yaml`.
-- **`home-assistant/builder` is deprecated upstream and held at 2026.02.1.** It builds its image
-  reference from its own ref (`github.action_path`'s last segment) and pulls
-  `ghcr.io/home-assistant/<arch>-builder:<that ref>`. 2026.02.1 is the last tag with a published
-  builder image — later tags have none, so any bump dies on `manifest unknown`. That image is also
-  tagged by commit SHA, so the SHA pin resolves, and `renovate.json` disables updates for the action.
-  Move to the `home-assistant/builder/actions/*` steps once HA's own add-ons repo does.
-  Every other action in the workflow is SHA-pinned and should stay so.
+- **CI builds with `home-assistant/builder/actions/build-image`**, HA's replacement for the deprecated
+  `home-assistant/builder` action. It reads nothing from `config.yaml` or `build.yaml`, so the
+  `Lint add-on` job passes the version, the `io.hass.*` labels and each arch's `build_from`
+  (`BUILD_ARCH` and `BUILD_VERSION` it sets itself). It builds natively, so `aarch64` runs on
+  `ubuntu-24.04-arm`. `skip-existing` keeps an already-published version from being re-pushed, so
+  a change that should reach users needs a version bump: `Lint add-on` fails a PR (Renovate's
+  excepted) that changes image files under an already-published version. The workflow's
+  `concurrency` uses `queue: max`, which actionlint doesn't know (`.github/actionlint.yaml`
+  ignores it). Every action is SHA-pinned; keep it so.
+- **Refresh releases need the `RELEASE_TOKEN` secret**: a fine-grained PAT for this repo with
+  Contents: Read and write. The Supervisor only updates an add-on on a new version, so a rebuild
+  under the same version never reaches users — `refresh-release.yml` bumps the patch version instead.

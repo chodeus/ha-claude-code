@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.10.1] - 2026-10-21
+
+### Changed
+- **Weekly refresh releases.** Every Sunday at 18:23 UTC a check looks for pending Alpine package upgrades in the published image and, when there are any, releases a new patch version, so Home Assistant's add-on auto-update picks them up. Each release rebuilds the whole image, so ha-mcp, the `ha` CLI and the other bundled tools refresh with it
+- **CI builds with HA's `build-image` action (2026.09.0)** instead of the deprecated `home-assistant/builder`. `aarch64` now builds on a native ARM runner, a version that is already published is never re-pushed under a new digest, and images are also tagged `latest`
+- **ttyd's version is tracked by Renovate**, so a new ttyd release arrives as a pull request
+- **Failed builds on `main` and failed refresh releases post to Discord**, and a refresh never bumps past a version that isn't published for every architecture yet
+
 ## [2.10.0] - 2026-10-21
 
 ### Added

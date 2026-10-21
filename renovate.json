@@ -12,13 +12,5 @@
       ],
       "datasourceTemplate": "docker"
     }
-  ],
-  "packageRules": [
-    {
-      "description": "home-assistant/builder is deprecated. It pulls ghcr.io/home-assistant/<arch>-builder:<its own ref>, and 2026.02.1 is the last tag with a published builder image -- later tags have none, so any bump fails with 'manifest unknown'. Hold it until the workflow moves to home-assistant/builder/actions/*.",
-      "matchManagers": ["github-actions"],
-      "matchDepNames": ["home-assistant/builder"],
-      "enabled": false
-    }
   ]
 }
