@@ -17,8 +17,12 @@ ENV \
     DISABLE_AUTOUPDATER=1 \
     USE_BUILTIN_RIPGREP=0
 
-# Install system dependencies (ttyd installed separately as static binary)
-RUN apk add --no-cache \
+# BUILD_VERSION is passed automatically by HA and busts the Docker cache on every version bump
+ARG BUILD_VERSION=dev
+
+# Install system dependencies (ttyd installed separately as static binary). `apk upgrade` first:
+# `apk add` leaves the base image's own packages (e.g. ca-certificates) at the version it shipped.
+RUN echo "Packages for ${BUILD_VERSION}" && apk upgrade --no-cache && apk add --no-cache \
     bash \
     curl \
     git \
@@ -64,9 +68,7 @@ RUN case "${BUILD_ARCH}" in \
 # (container runs as root so sudo is unnecessary, but HA's security profile blocks the real binary)
 RUN printf '#!/bin/sh\nexec "$@"\n' > /usr/local/bin/sudo && chmod +x /usr/local/bin/sudo
 
-# Install Claude Code via npm
-# BUILD_VERSION is passed automatically by HA and busts the Docker cache on every version bump
-ARG BUILD_VERSION=dev
+# Install Claude Code via npm (BUILD_VERSION, declared above, re-runs it on every version bump).
 # Smoke-test the install so a broken npm publish (bad entrypoint, missing platform binary)
 # fails the build instead of shipping to GHCR. GH runners have AVX, so this cannot catch
 # CPU-incompatible releases (that is handled at runtime) — it catches non-CPU breakage.

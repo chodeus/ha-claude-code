@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - **`USE_BUILTIN_RIPGREP=0` is set in the image**, as Claude Code's setup docs require on Alpine, so search uses the image's own `ripgrep`
 
 ### Fixed
+- **Releases now upgrade the base image's Alpine packages.** The Dockerfile only ran `apk add`, which leaves packages the base image already has at the version it shipped — for `ca-certificates` that is 20260909, which still trusts the compromised eMudhra intermediates disclosed on 2026-10-20. Each release now runs `apk upgrade` first, so this one ships `ca-certificates` 20261020-r0, which drops those roots
 - **The pre-approved read rules never matched.** `Read(/homeassistant/**)`, `Read(/config/**)`, `Read(/share/**)` and `Read(/media/**)` had a single leading slash, which Claude Code anchors at `~/.claude` in user settings — so reads under `/share`, `/media` and `/config` still asked for approval (`/homeassistant` only looked fine because it is the working directory). They are now absolute `//` paths, so reads in those four folders no longer prompt, whatever `working_directory` is set to. Like the MCP tool rules beside them, they are written — and the old ones removed from an existing `settings.json` — on start when `enable_mcp` is on (the default)
 
 ## [2.9.0] - 2026-08-08
