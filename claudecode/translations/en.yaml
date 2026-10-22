@@ -46,8 +46,8 @@ configuration:
   claude_model:
     name: Claude Model
     description: >-
-      Pick a model. "default" uses your Claude account default (switch with /model in a
-      session). "fable", "opus", "sonnet" and "haiku" are Claude Code's family aliases: each
+      Pick a model. "default" leaves it unpinned: Claude Code uses a model you set with /model,
+      else your account default. "fable", "opus", "sonnet" and "haiku" are Claude Code's family aliases: each
       uses that family's newest model on the Anthropic API (some other providers pick an
       earlier one), so your choice stays current with no config change. To pin one exact
       release, choose "custom" and enter its id in Model (custom) below.

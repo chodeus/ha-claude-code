@@ -192,8 +192,9 @@ Supervisor refuses to start the add-on when a saved choice is no longer in the l
 
 > **Upgrading from 2.10 or earlier:** the option used to be called `model` and listed pinned ids.
 > It is now `claude_model`, and the old setting is ignored, so after the update the add-on starts
-> on `default` and its log says so. Pick your model again in the Configuration tab (an exact id
-> goes in `model_custom` with `custom` selected).
+> on `default` (unpinned, see below) and its log says so. Pick your model again in the
+> Configuration tab (an exact id goes in `model_custom` with `custom` selected); that first save
+> also clears the old setting.
 
 > **About the 1M context window:** the current models (Fable 5.1, Opus 5.5, Sonnet 5.5, Haiku 5.5)
 > and Fable 5, Opus 5 and Sonnet 5 are **natively 1M-context** — there is nothing to opt into, and

@@ -47,8 +47,8 @@ configuration:
   claude_model:
     name: Modèle Claude
     description: >-
-      Choisissez un modèle. « default » utilise le modèle par défaut de votre compte Claude
-      (changez avec /model dans une session). « fable », « opus », « sonnet » et « haiku » sont
+      Choisissez un modèle. « default » ne fixe aucun modèle : Claude Code utilise celui choisi
+      avec /model, sinon le modèle par défaut de votre compte. « fable », « opus », « sonnet » et « haiku » sont
       les alias de famille de Claude Code : chacun utilise le modèle le plus récent de sa
       famille sur l'API Anthropic (d'autres fournisseurs peuvent en choisir un plus ancien),
       donc votre choix reste à jour sans modifier la configuration. Pour fixer une version

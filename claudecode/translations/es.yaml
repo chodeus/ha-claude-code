@@ -47,8 +47,8 @@ configuration:
   claude_model:
     name: Modelo Claude
     description: >-
-      Elige un modelo. "default" usa el predeterminado de tu cuenta Claude (cambia con /model
-      en la sesión). "fable", "opus", "sonnet" y "haiku" son los alias de familia de Claude
+      Elige un modelo. "default" no fija ninguno: Claude Code usa el que elegiste con /model o,
+      si no, el predeterminado de tu cuenta. "fable", "opus", "sonnet" y "haiku" son los alias de familia de Claude
       Code: cada uno usa el modelo más reciente de su familia en la API de Anthropic (otros
       proveedores pueden elegir uno anterior), así tu elección se mantiene al día sin cambiar
       la configuración. Para fijar una versión exacta, elige "custom" e indica su id en Modelo

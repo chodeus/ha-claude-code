@@ -270,13 +270,13 @@ case "$MODEL" in
     *)       EFFECTIVE_MODEL="$MODEL" ;;
 esac
 if [ "$MODEL" = "custom" ] && [ -z "$MODEL_CUSTOM" ]; then
-    echo "[WARN] Claude Model is 'custom' but Model (custom) is empty — using the account default. Enter a model id in the app's Configuration tab"
+    echo "[WARN] Claude Model is 'custom' but Model (custom) is empty, so the model is left unpinned. Enter a model id in the app's Configuration tab"
 fi
 if [ -n "$EFFECTIVE_MODEL" ]; then
     export ANTHROPIC_MODEL="$EFFECTIVE_MODEL"
     echo "[INFO] Using Claude model: $EFFECTIVE_MODEL"
 else
-    echo "[INFO] No Claude Model picked, so Claude Code uses your account default. To choose one, pick a Claude Model in the app's Configuration tab (or use /model in a session)"
+    echo "[INFO] No Claude Model picked, so Claude Code chooses: a model you set with /model, else your account default. To choose one here, pick a Claude Model in the app's Configuration tab"
 fi
 
 # Bootstrap the user-scope settings file up front — the MCP pre-authorization AND the Remote
