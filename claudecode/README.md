@@ -403,5 +403,5 @@ jq 'del(.permissions.defaultMode)' /homeassistant/.claudecode/settings.json > /t
 
 ## Support
 
-- [GitHub Issues](https://github.com/chodeus/robsonfelix-hass-addons/issues)
+- [GitHub Issues](https://github.com/chodeus/ha-claude-code/issues)
 - [Home Assistant Community](https://community.home-assistant.io/)

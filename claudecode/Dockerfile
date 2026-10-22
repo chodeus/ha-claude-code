@@ -5,7 +5,7 @@ FROM ${BUILD_FROM}
 LABEL maintainer="chodeus"
 LABEL org.opencontainers.image.title="Claude Code for Home Assistant"
 LABEL org.opencontainers.image.description="Claude Code CLI with web terminal and HA integration"
-LABEL org.opencontainers.image.source="https://github.com/chodeus/robsonfelix-hass-addons"
+LABEL org.opencontainers.image.source="https://github.com/chodeus/ha-claude-code"
 LABEL org.opencontainers.image.licenses="MIT"
 
 # Environment setup. USE_BUILTIN_RIPGREP=0: Claude Code's setup docs require the system
