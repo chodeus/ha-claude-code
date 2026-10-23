@@ -161,20 +161,18 @@ the tmux session keeps everything intact meanwhile.
 | `working_directory` | Start directory | /homeassistant |
 | `session_persistence` | Keep the session alive across reconnects (uses tmux) | true |
 | `auto_update_claude` | Auto-update Claude Code (startup + hourly). When off, you get an update notification instead | false |
-| `model` | Model to use (dropdown; `default` = account default) | default |
-| `model_custom` | Model id used only when `model` is `custom` | "" (empty) |
+| `claude_model` | Model to use (dropdown: `default`, a family alias, or `custom`) | default |
+| `model_custom` | Model id used only when `claude_model` is `custom` | "" (empty) |
 | `enable_remote_control` | Auto-start Claude Code's Remote Control bridge (view/steer from claude.ai or the mobile app) | false |
 | `remote_control_session_prefix` | Prefix for auto-generated Remote Control session names | HomeAssistant |
 | `restrict_terminal_port` | *(experimental)* Firewall the terminal port to HA ingress only — see [Container Security](#container-security) | false |
 
 ### Model Selection
 
-Pick a model from the `model` dropdown. The family aliases (`fable`, `opus`, `sonnet`, `haiku`)
-follow Claude Code's own mapping, so they keep up with new releases without a config change. On a
-claude.ai plan or the Anthropic API that is the newest model of each family; some other providers
-map `opus`, `sonnet` or `haiku` to an earlier version, and `fable` means Fable 5 in Claude apps
-gateway sessions. A full id pins one release. Older ids stay in the list so a saved choice keeps
-working.
+Pick a model from the `claude_model` dropdown. The family aliases follow Claude Code's own mapping,
+so they keep up with new releases without a config change. On a claude.ai plan or the Anthropic API
+each is the newest model of its family; some other providers map `opus`, `sonnet` or `haiku` to an
+earlier version, and `fable` means Fable 5 in Claude apps gateway sessions.
 
 | Option | Meaning |
 |--------|---------|
@@ -183,26 +181,26 @@ working.
 | `opus` | Newest Opus |
 | `sonnet` | Newest Sonnet — balanced speed and capability |
 | `haiku` | Newest Haiku — fastest, for simple queries |
-| `claude-fable-5-1` | Fable 5.1 — the most capable model. 1M context, priced above Opus |
-| `claude-opus-5-5` | Opus 5.5 — current Opus. 1M context |
-| `claude-sonnet-5-5` | Sonnet 5.5 — current Sonnet. 1M context |
-| `claude-haiku-5-5` | Haiku 5.5 — current Haiku. 1M context |
-| `claude-fable-5` | Previous Fable. 1M context |
-| `claude-opus-5` | Previous Opus. 1M context |
-| `claude-opus-4-8` | Older Opus. 1M context |
-| `claude-opus-4-7` | Older Opus. 1M context |
-| `claude-sonnet-5` | Previous Sonnet. 1M context |
-| `claude-sonnet-4-6` | Older Sonnet. 200K context |
-| `claude-haiku-4-5` | Previous Haiku. 200K context |
-| `custom` | Use whatever id you put in `model_custom` |
+| `custom` | Use the exact model id in `model_custom` |
 
-> **About the 1M context window:** every pinned id in the list except `claude-sonnet-4-6` and
-> `claude-haiku-4-5` is **natively 1M-context** — there is nothing to opt into. An alias gets the
-> window of whichever model your provider maps it to. The `[1m]`-suffixed entries this dropdown used to
-> carry were removed in 2.9.0: on those models the suffix is a no-op, and Fable 5 never offered a
-> `[1m]` variant at all. Sonnet 4.6 still defaults to 200K and can be pushed to 1M with the suffix
-> — put `claude-sonnet-4-6[1m]` in `model_custom` if you want that, or switch in-session with
-> `/model`.
+To pin one release, choose **`custom`** and enter its id in `model_custom`: for example
+`claude-opus-5-5` (Opus 5.5), `claude-fable-5-1`, `claude-sonnet-5-5`, `claude-haiku-5-5`, or an
+older id such as `claude-opus-5`. Any id Claude Code accepts works, with no add-on update. If
+`custom` is selected but `model_custom` is empty, the add-on leaves the model unpinned (same as
+`default`). The dropdown holds only aliases so that nothing in it ever has to be removed: the
+Supervisor refuses to start the add-on when a saved choice is no longer in the list.
+
+> **Upgrading from 2.10 or earlier:** the option used to be called `model` and listed pinned ids.
+> It is now `claude_model`, and the old setting is ignored, so after the update the add-on starts
+> on `default` (unpinned, see below) and its log says so. Pick your model again in the
+> Configuration tab (an exact id goes in `model_custom` with `custom` selected); that first save
+> also clears the old setting.
+
+> **About the 1M context window:** the current models (Fable 5.1, Opus 5.5, Sonnet 5.5, Haiku 5.5)
+> and Fable 5, Opus 5 and Sonnet 5 are **natively 1M-context** — there is nothing to opt into, and
+> an alias gets the window of whichever model your provider maps it to. Sonnet 4.6 and Haiku 4.5
+> default to 200K; Sonnet 4.6 can be pushed to 1M with the suffix: put `claude-sonnet-4-6[1m]` in
+> `model_custom`, or switch in-session with `/model`.
 >
 > **⚠️ Cost:** a natively-1M model needs no opt-in, but a long conversation still costs more
 > tokens, and on the Anthropic API Haiku 5.5 charges more per token once a prompt passes 100K.
@@ -216,12 +214,7 @@ working.
 > `ANTHROPIC_MODEL`). Claude Code then picks the model by its own precedence: a model in
 > `~/.claude/settings.json` (e.g. one you previously chose with `/model`) wins over the account
 > default. So if you've set a model in-session before, `default` may use *that*, not your
-> subscription default — pin a model in this dropdown if you want a guaranteed choice.
-
-The dropdown keeps the common choices typo-proof. For a model that isn't listed yet (a newer
-release), choose **`custom`** and enter its id in `model_custom` — no add-on update needed. If
-`custom` is selected but `model_custom` is empty, the add-on leaves the model unpinned (same as
-`default`).
+> subscription default — pick an alias or a `custom` id if you want a guaranteed choice.
 
 ### Remote Control
 

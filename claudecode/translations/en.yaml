@@ -43,24 +43,21 @@ configuration:
     description: >-
       Automatically check for and install Claude Code updates — on startup and hourly
       while running. Keeps Claude Code current without add-on version bumps.
-  model:
+  claude_model:
     name: Claude Model
     description: >-
-      Pick a model. "default" uses your Claude account default (switch with /model in a
-      session). The aliases "fable", "opus", "sonnet" and "haiku" use that family's newest
-      model on the Anthropic API (some other providers pick an earlier one). Or pin a
-      release: "claude-fable-5-1" is the most capable (top tier above Opus),
-      "claude-opus-5-5" is the current Opus, "claude-sonnet-5-5" balances speed and
-      capability, and "claude-haiku-5-5" is the fastest. Every pinned id except Sonnet 4.6
-      and Haiku 4.5 has a 1M-token context window (availability and pricing depend on your
-      plan). Choose "custom" to use any model id entered in Model (custom) below — handy for
-      newer models not in this list, with no add-on update needed.
+      Pick a model. "default" leaves it unpinned: Claude Code uses a model you set with /model,
+      else your account default. "fable", "opus", "sonnet" and "haiku" are Claude Code's family aliases: each
+      uses that family's newest model on the Anthropic API (some other providers pick an
+      earlier one), so your choice stays current with no config change. To pin one exact
+      release, choose "custom" and enter its id in Model (custom) below.
   model_custom:
     name: Model (custom)
     description: >-
-      Only used when Model is set to "custom". Enter the exact model id,
+      Only used when Claude Model is set to "custom". Enter the exact model id,
       e.g. claude-opus-5-5, or a suffixed one like claude-sonnet-4-6[1m] for the 1M-token
-      context window. If left empty, the account default is used.
+      context window. If left empty, the model is left unpinned:
+      Claude Code uses a model you set with /model, else your account default.
   enable_remote_control:
     name: Enable Remote Control
     description: >-

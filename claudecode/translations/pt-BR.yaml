@@ -44,25 +44,22 @@ configuration:
     description: >-
       Verifica e instala atualizações do Claude Code automaticamente — ao iniciar e a cada
       hora em execução. Mantém o Claude Code atualizado sem precisar atualizar o add-on.
-  model:
+  claude_model:
     name: Modelo Claude
     description: >-
-      Escolha um modelo. "default" usa o padrão da sua conta Claude (troque com /model na
-      sessão). Os aliases "fable", "opus", "sonnet" e "haiku" usam o modelo mais recente
-      da família na API da Anthropic (outros provedores podem escolher um anterior). Ou fixe uma
-      versão: "claude-fable-5-1" é o mais capaz (nível acima
-      do Opus), "claude-opus-5-5" é o Opus atual, "claude-sonnet-5-5" equilibra velocidade e
-      capacidade, e "claude-haiku-5-5" é o mais rápido. Todos os ids fixos exceto Sonnet 4.6
-      e Haiku 4.5 têm janela de contexto de 1M tokens (disponibilidade e preço dependem do
-      seu plano).
-      Escolha "custom" para usar qualquer id informado em Modelo (personalizado) abaixo —
-      útil para modelos novos fora desta lista, sem atualizar o add-on.
+      Escolha um modelo. "default" não fixa nenhum: o Claude Code usa o que você escolheu com
+      /model ou, se não houver, o padrão da sua conta. "fable", "opus", "sonnet" e "haiku" são os aliases de família do Claude Code:
+      cada um usa o modelo mais recente da família na API da Anthropic (outros provedores
+      podem escolher um anterior), então sua escolha continua atual sem mudar a configuração.
+      Para fixar uma versão exata, escolha "custom" e informe o id em Modelo (personalizado)
+      abaixo.
   model_custom:
     name: Modelo (personalizado)
     description: >-
-      Usado apenas quando Modelo está como "custom". Informe o id exato do modelo,
+      Usado apenas quando Modelo Claude está como "custom". Informe o id exato do modelo,
       ex.: claude-opus-5-5, ou um com sufixo como claude-sonnet-4-6[1m] para a janela de
-      contexto de 1M tokens. Se vazio, o padrão da conta é usado.
+      contexto de 1M tokens. Se vazio, nenhum é fixado: o
+      Claude Code usa o que você escolheu com /model ou, se não houver, o padrão da sua conta.
   enable_remote_control:
     name: Habilitar Controle Remoto
     description: >-

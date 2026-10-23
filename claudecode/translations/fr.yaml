@@ -44,27 +44,24 @@ configuration:
       Vérifie et installe automatiquement les mises à jour de Claude Code — au démarrage et
       toutes les heures pendant l'exécution. Maintient Claude Code à jour sans changer la
       version de l'add-on.
-  model:
+  claude_model:
     name: Modèle Claude
     description: >-
-      Choisissez un modèle. « default » utilise le modèle par défaut de votre compte Claude
-      (changez avec /model dans une session). Les alias « fable », « opus », « sonnet » et
-      « haiku » utilisent le modèle le plus récent de leur famille sur l'API Anthropic
-      (d'autres fournisseurs peuvent en choisir un plus ancien). Ou fixez une version :
-      « claude-fable-5-1 » est le plus performant (niveau au-dessus d'Opus),
-      « claude-opus-5-5 » est l'Opus actuel, « claude-sonnet-5-5 » équilibre vitesse et
-      capacité, et « claude-haiku-5-5 » est le plus rapide. Tous les identifiants fixes sauf
-      Sonnet 4.6 et Haiku 4.5 disposent d'une fenêtre de contexte de 1M de tokens
-      (disponibilité et tarif selon votre offre). Choisissez « custom » pour utiliser tout
-      identifiant saisi dans Modèle (personnalisé) ci-dessous — pratique pour les nouveaux
-      modèles absents de cette liste, sans mise à jour de l'add-on.
+      Choisissez un modèle. « default » ne fixe aucun modèle : Claude Code utilise celui choisi
+      avec /model, sinon le modèle par défaut de votre compte. « fable », « opus », « sonnet » et « haiku » sont
+      les alias de famille de Claude Code : chacun utilise le modèle le plus récent de sa
+      famille sur l'API Anthropic (d'autres fournisseurs peuvent en choisir un plus ancien),
+      donc votre choix reste à jour sans modifier la configuration. Pour fixer une version
+      précise, choisissez « custom » et saisissez son identifiant dans Modèle (personnalisé)
+      ci-dessous.
   model_custom:
     name: Modèle (personnalisé)
     description: >-
-      Utilisé uniquement lorsque Modèle est réglé sur « custom ». Saisissez l'identifiant
+      Utilisé uniquement lorsque Modèle Claude est réglé sur « custom ». Saisissez l'identifiant
       exact du modèle, par ex. claude-opus-5-5, ou un identifiant suffixé comme
-      claude-sonnet-4-6[1m] pour la fenêtre de contexte de 1M de tokens. Si laissé vide, le
-      modèle par défaut du compte est utilisé.
+      claude-sonnet-4-6[1m] pour la fenêtre de contexte de 1M de tokens. Si laissé vide, aucun modèle
+      n'est fixé : Claude Code utilise celui choisi avec /model, sinon le modèle par défaut de votre
+      compte.
   enable_remote_control:
     name: Activer le Contrôle à distance
     description: >-

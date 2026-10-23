@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.11.0] - 2026-10-23
+
+### Changed
+- **⚠️ The model dropdown is now `claude_model`, and it lists only `default`, the four family aliases and `custom` — pick your model again after updating.** The aliases already follow each family's newest model, so the list never needs a new entry again; a pinned release goes through `custom` (for example `claude-opus-5-5` in **Model (custom)**). The option was renamed so that the old saved `model` value can't stop the add-on from starting: the Supervisor refuses to start an add-on whose saved value has left a dropdown (the one-time re-pick that 2.6.0 and 2.9.0 needed), but it simply ignores an option that no longer exists. So the add-on starts unpinned (a model you set with `/model`, else your account default), its log says to pick a Claude Model in the Configuration tab, and the first save there also clears the old `model` setting
+
 ## [2.10.1] - 2026-10-21
 
 ### Changed

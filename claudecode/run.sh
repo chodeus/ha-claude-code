@@ -260,10 +260,9 @@ if [ "$AUTO_UPDATE" = "true" ]; then
     fi
 fi
 
-# Set Claude model. Pick one from the dropdown, or choose "custom" and put any model id in
-# model_custom (so new models work with no add-on update). "default" leaves it unset, so
-# Claude Code uses your account/subscription default and in-session /model keeps working.
-MODEL=$(jq -r '.model // "default"' /data/options.json)
+# Set Claude model: a family alias, or "custom" with any model id in model_custom. "default" leaves it
+# unset, so Claude Code uses the account default and in-session /model keeps working.
+MODEL=$(jq -r '.claude_model // "default"' /data/options.json)
 MODEL_CUSTOM=$(jq -r '.model_custom // ""' /data/options.json)
 case "$MODEL" in
     custom)  EFFECTIVE_MODEL="$MODEL_CUSTOM" ;;
@@ -271,13 +270,13 @@ case "$MODEL" in
     *)       EFFECTIVE_MODEL="$MODEL" ;;
 esac
 if [ "$MODEL" = "custom" ] && [ -z "$MODEL_CUSTOM" ]; then
-    echo "[WARN] model is 'custom' but model_custom is empty — falling back to the account default"
+    echo "[WARN] Claude Model is 'custom' but Model (custom) is empty, so the model is left unpinned. Enter a model id in the app's Configuration tab"
 fi
 if [ -n "$EFFECTIVE_MODEL" ]; then
     export ANTHROPIC_MODEL="$EFFECTIVE_MODEL"
     echo "[INFO] Using Claude model: $EFFECTIVE_MODEL"
 else
-    echo "[INFO] Using Claude Code's default model (pick one in config, or use /model in-session)"
+    echo "[INFO] No Claude Model picked, so Claude Code chooses: a model you set with /model, else your account default. To choose one here, pick a Claude Model in the app's Configuration tab"
 fi
 
 # Bootstrap the user-scope settings file up front — the MCP pre-authorization AND the Remote
