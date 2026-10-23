@@ -1,10 +1,16 @@
-# Dispatched by image-refresh.yml when the published image's Alpine packages fall behind.
+# Dispatched by image-refresh.yml when the published image's Alpine packages or its ha-mcp fall behind.
 # Pushes with RELEASE_TOKEN because a GITHUB_TOKEN push would not start the Builder workflow.
 
 name: Refresh release
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'The changelog line for this release.'
+        required: false
+        type: string
+        default: 'Rebuilt with the latest Alpine packages (weekly refresh)'
 
 permissions:
   contents: read
@@ -25,6 +31,8 @@ jobs:
           token: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Bump, commit and push
+        env:
+          REASON: ${{ inputs.reason || 'Rebuilt with the latest Alpine packages (weekly refresh)' }}
         run: |
           set -euo pipefail
           cur=$(yq -r '.version' claudecode/config.yaml)
@@ -44,7 +52,7 @@ jobs:
           next="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3] + 1))"
           sed -i "s/^version: \"$cur\"$/version: \"$next\"/" claudecode/config.yaml
           grep -qx "version: \"$next\"" claudecode/config.yaml || { echo "::error::config.yaml version line not updated"; exit 1; }
-          ENTRY=$(printf '## [%s] - %s\n\n### Changed\n- Rebuilt with the latest Alpine packages (weekly refresh)\n' "$next" "$(date -u +%F)") \
+          ENTRY=$(printf '## [%s] - %s\n\n### Changed\n- %s\n' "$next" "$(date -u +%F)" "${REASON//$'\n'/ }") \
             awk '!done && /^## \[/ { print ENVIRON["ENTRY"]; print ""; done = 1 } { print }' \
             claudecode/CHANGELOG.md > CHANGELOG.tmp
           mv CHANGELOG.tmp claudecode/CHANGELOG.md

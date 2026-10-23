@@ -1,5 +1,5 @@
-# From chodeus-ops templates/caller-image-refresh.yml. Weekly rather than daily: every release
-# restarts the add-on, and the dispatched workflow cuts a new version because HA only updates on one.
+# From chodeus-ops templates/caller-image-refresh.yml, plus an ha-mcp check (a pip install the Alpine
+# check can't see). Weekly: every release restarts the add-on, and HA only updates on a new version.
 
 name: Image refresh
 
@@ -26,5 +26,64 @@ jobs:
       workflow: refresh-release.yml
       ref: ${{ github.event.repository.default_branch }}
     # Posts the package changes, or a failure; a clean check posts nothing.
+    secrets:
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+  ha-mcp:
+    # Skipped when the Alpine check already dispatched a release: that rebuild installs the newest ha-mcp.
+    needs: refresh
+    if: ${{ needs.refresh.result == 'success' && needs.refresh.outputs.stale != 'true' }}
+    permissions:
+      actions: write
+    runs-on: ubuntu-latest
+    outputs:
+      behind: ${{ steps.check.outputs.behind }}
+      installed: ${{ steps.check.outputs.installed }}
+      latest: ${{ steps.check.outputs.latest }}
+    env:
+      IMAGE: ghcr.io/chodeus/claudecode-amd64:latest
+    steps:
+      - name: Pull the published image
+        run: docker pull -q --platform linux/amd64 "$IMAGE" >/dev/null
+
+      # pip in the image offers only versions its Python can install, so "behind" means a rebuild would change it.
+      - name: Compare ha-mcp with what a rebuild would install
+        id: check
+        run: |
+          set -euo pipefail
+          out=$(docker run --rm --platform linux/amd64 --entrypoint pip3 "$IMAGE" index versions ha-mcp 2>&1) || {
+            echo "::error::pip3 index versions failed in $IMAGE:"; printf '%s\n' "$out"; exit 1; }
+          installed=$(awk '/^ *INSTALLED:/ {print $2}' <<<"$out")
+          latest=$(awk '/^ *LATEST:/ {print $2}' <<<"$out")
+          if ! [[ $installed =~ ^[0-9]+(\.[0-9]+)*$ && $latest =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
+            echo "::error::Could not read ha-mcp's versions from the image:"; printf '%s\n' "$out"; exit 1
+          fi
+          behind=false
+          if [ "$installed" != "$latest" ] && [ "$(printf '%s\n%s\n' "$installed" "$latest" | sort -V | tail -1)" = "$latest" ]; then
+            behind=true
+          fi
+          echo "ha-mcp in $IMAGE: $installed; a rebuild would install $latest (behind=$behind)" | tee -a "$GITHUB_STEP_SUMMARY"
+          { echo "installed=$installed"; echo "latest=$latest"; echo "behind=$behind"; } >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch a refresh release
+        if: ${{ steps.check.outputs.behind == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          REF: ${{ github.event.repository.default_branch }}
+          REASON: Rebuilt with ha-mcp ${{ steps.check.outputs.latest }} (was ${{ steps.check.outputs.installed }}) and the latest Alpine packages (weekly refresh)
+        run: gh workflow run refresh-release.yml --ref "$REF" -f reason="$REASON"
+
+  ha-mcp-notify:
+    needs: ha-mcp
+    if: ${{ !cancelled() && (needs.ha-mcp.result == 'failure' || needs.ha-mcp.outputs.behind == 'true') }}
+    permissions: {}
+    uses: chodeus/chodeus-ops/.github/workflows/notify-discord.yml@cbd544d21103cfe854c8e0ec717ee2be4f097ad7 # main
+    with:
+      event_type: workflow
+      status: ${{ needs.ha-mcp.result == 'success' && 'info' || 'failure' }}
+      title: "${{ needs.ha-mcp.result == 'success' && format('♻️ ha-claude-code image refresh — ha-mcp {0} → {1}', needs.ha-mcp.outputs.installed, needs.ha-mcp.outputs.latest) || '❌ ha-claude-code ha-mcp check failed' }}"
+      description: "${{ needs.ha-mcp.result == 'success' && 'ha-mcp has a newer release than the published image, so a refresh release was dispatched.' || 'The ha-mcp version check or its dispatch failed; see the run.' }}"
+      url: ${{ github.server_url }}/${{ github.repository }}/actions/workflows/refresh-release.yml
     secrets:
       DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
