@@ -59,8 +59,9 @@ configuration:
     description: >-
       Utilisé uniquement lorsque Modèle Claude est réglé sur « custom ». Saisissez l'identifiant
       exact du modèle, par ex. claude-opus-5-5, ou un identifiant suffixé comme
-      claude-sonnet-4-6[1m] pour la fenêtre de contexte de 1M de tokens. Si laissé vide, le
-      modèle par défaut du compte est utilisé.
+      claude-sonnet-4-6[1m] pour la fenêtre de contexte de 1M de tokens. Si laissé vide, aucun modèle
+      n'est fixé : Claude Code utilise celui choisi avec /model, sinon le modèle par défaut de votre
+      compte.
   enable_remote_control:
     name: Activer le Contrôle à distance
     description: >-

@@ -58,7 +58,8 @@ configuration:
     description: >-
       Se usa solo cuando Modelo Claude está en "custom". Indica el id exacto del modelo,
       ej.: claude-opus-5-5, o uno con sufijo como claude-sonnet-4-6[1m] para la ventana de
-      contexto de 1M tokens. Si se deja vacío, se usa el predeterminado de la cuenta.
+      contexto de 1M tokens. Si se deja vacío, no se fija
+      ninguno: Claude Code usa el que elegiste con /model o, si no, el predeterminado de tu cuenta.
   enable_remote_control:
     name: Habilitar Control Remoto
     description: >-

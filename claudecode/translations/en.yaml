@@ -56,7 +56,8 @@ configuration:
     description: >-
       Only used when Claude Model is set to "custom". Enter the exact model id,
       e.g. claude-opus-5-5, or a suffixed one like claude-sonnet-4-6[1m] for the 1M-token
-      context window. If left empty, the account default is used.
+      context window. If left empty, the model is left unpinned:
+      Claude Code uses a model you set with /model, else your account default.
   enable_remote_control:
     name: Enable Remote Control
     description: >-
