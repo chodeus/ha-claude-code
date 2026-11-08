@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.11.3] - 2026-11-08
+
+### Changed
+- Rebuilt with the latest Alpine packages (weekly refresh)
+
 ## [2.11.2] - 2026-11-01
 
 ### Changed
