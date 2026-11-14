@@ -4,7 +4,7 @@
 # warning is logged, and ghcr.io/home-assistant/base:latest (Alpine) is substituted silently.
 # The build then died far downstream on `apt-get: not found`. The tag is multi-arch
 # (linux/amd64 + linux/arm64), so one FROM covers both arches this add-on declares.
-FROM mcr.microsoft.com/playwright:v1.64.1-noble@sha256:7852dc5a7d72f5fe458a597d690f6c42fbc8e9e26ddfa95f8e6ef552558d9bbf
+FROM mcr.microsoft.com/playwright:v1.65.1-noble@sha256:1507cbfc550a63a6b7396791ca4f00df17beb56342d2447b3f106c306f525579
 
 # Labels
 LABEL maintainer="chodeus"
